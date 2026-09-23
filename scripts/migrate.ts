@@ -1,8 +1,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { loadEnvConfig } from "@next/env";
+import nextEnv from "@next/env";
 import postgres from "postgres";
 
+const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
 
 const connectionString = process.env.DATABASE_URL;

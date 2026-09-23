@@ -1,5 +1,6 @@
-import { loadEnvConfig } from "@next/env";
+import nextEnv from "@next/env";
 
+const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
 
 const { createDemoTemplate } = await import("../src/lib/demo-template");
@@ -13,4 +14,3 @@ if (existing.length > 0) {
 
 const id = await saveImportedTemplate(createDemoTemplate());
 console.log(`Seeded demo template: ${id}`);
-

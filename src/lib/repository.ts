@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { Sql } from "postgres";
 
 import { getDatabase } from "@/lib/db";
@@ -63,67 +64,89 @@ export async function listTemplates(): Promise<TemplateListItem[]> {
 export async function saveImportedTemplate(parsed: ParsedTemplate): Promise<string> {
   const sql = getDatabase();
   return sql.begin(async (transaction) => {
-    const [template] = await transaction`
+    const templateId = randomUUID();
+    await transaction`
       INSERT INTO templates (
-        name, source_filename, source_fingerprint, import_summary
+        id, name, source_filename, source_fingerprint, import_summary
       ) VALUES (
+        ${templateId},
         ${parsed.name},
         ${parsed.sourceFilename},
         ${parsed.sourceFingerprint},
         ${transaction.json(asJson(parsed.summary))}
       )
-      RETURNING id
     `;
 
+    const sectionRows = [];
+    const itemRows = [];
+    const commentRows = [];
+
     for (const section of parsed.sections) {
-      const [storedSection] = await transaction`
-        INSERT INTO sections (template_id, source_key, name, position, metadata)
-        VALUES (
-          ${template.id}, ${section.sourceKey}, ${section.name}, ${section.position},
-          ${transaction.json(asJson(section.metadata))}
-        )
-        RETURNING id
-      `;
+      const sectionId = randomUUID();
+      sectionRows.push({
+        id: sectionId,
+        template_id: templateId,
+        source_key: section.sourceKey,
+        name: section.name,
+        position: section.position,
+        metadata: section.metadata,
+      });
 
       for (const item of section.items) {
-        const [storedItem] = await transaction`
-          INSERT INTO items (section_id, source_key, name, position, metadata)
-          VALUES (
-            ${storedSection.id}, ${item.sourceKey}, ${item.name}, ${item.position},
-            ${transaction.json(asJson(item.metadata))}
-          )
-          RETURNING id
-        `;
+        const itemId = randomUUID();
+        itemRows.push({
+          id: itemId,
+          section_id: sectionId,
+          source_key: item.sourceKey,
+          name: item.name,
+          position: item.position,
+          metadata: item.metadata,
+        });
 
         for (const comment of item.comments) {
-          await transaction`
-            INSERT INTO comments (
-              item_id, source_key, name, source_html, body_html, plain_text,
-              comment_type, category, position, source_row, metadata
-            ) VALUES (
-              ${storedItem.id}, ${comment.sourceKey}, ${comment.name},
-              ${comment.sourceHtml}, ${comment.bodyHtml}, ${comment.plainText},
-              ${comment.commentType}, ${comment.category}, ${comment.position},
-              ${comment.sourceRow}, ${transaction.json(asJson(comment.metadata))}
-            )
-          `;
+          commentRows.push({
+            id: randomUUID(),
+            item_id: itemId,
+            source_key: comment.sourceKey,
+            name: comment.name,
+            source_html: comment.sourceHtml,
+            body_html: comment.bodyHtml,
+            plain_text: comment.plainText,
+            comment_type: comment.commentType,
+            category: comment.category,
+            position: comment.position,
+            source_row: comment.sourceRow,
+            metadata: comment.metadata,
+          });
         }
       }
     }
 
-    for (const warning of parsed.warnings) {
-      await transaction`
-        INSERT INTO import_warnings (
-          template_id, code, severity, message, row_number, field, raw_data
-        ) VALUES (
-          ${template.id}, ${warning.code}, ${warning.severity}, ${warning.message},
-          ${warning.rowNumber ?? null}, ${warning.field ?? null},
-          ${warning.rawData ? transaction.json(asJson(warning.rawData)) : null}
-        )
-      `;
+    if (sectionRows.length > 0) {
+      await transaction`INSERT INTO sections ${transaction(sectionRows)}`;
+    }
+    if (itemRows.length > 0) {
+      await transaction`INSERT INTO items ${transaction(itemRows)}`;
+    }
+    if (commentRows.length > 0) {
+      await transaction`INSERT INTO comments ${transaction(commentRows)}`;
     }
 
-    return template.id as string;
+    const warningRows = parsed.warnings.map((warning) => ({
+      id: randomUUID(),
+      template_id: templateId,
+      code: warning.code,
+      severity: warning.severity,
+      message: warning.message,
+      row_number: warning.rowNumber ?? null,
+      field: warning.field ?? null,
+      raw_data: warning.rawData ?? null,
+    }));
+    if (warningRows.length > 0) {
+      await transaction`INSERT INTO import_warnings ${transaction(warningRows)}`;
+    }
+
+    return templateId;
   });
 }
 
@@ -277,62 +300,89 @@ export async function copyTemplate(id: string, requestedName?: string): Promise<
   const sql = getDatabase();
 
   return sql.begin(async (transaction) => {
-    const [copy] = await transaction`
+    const copyId = randomUUID();
+    await transaction`
       INSERT INTO templates (
-        name, source_filename, source_fingerprint, source_type,
+        id, name, source_filename, source_fingerprint, source_type,
         copied_from_id, import_summary
       ) VALUES (
+        ${copyId},
         ${requestedName?.trim() || `${source.name} — Copy`},
         ${source.sourceFilename}, ${source.sourceFingerprint},
         'spectora_html_text_xlsx', ${source.id},
         ${transaction.json(asJson(source.importSummary))}
       )
-      RETURNING id
     `;
 
+    const sectionRows = [];
+    const itemRows = [];
+    const commentRows = [];
+
     for (const section of source.sections) {
-      const [newSection] = await transaction`
-        INSERT INTO sections (template_id, source_key, name, position, metadata)
-        VALUES (
-          ${copy.id}, ${section.sourceKey}, ${section.name}, ${section.position},
-          ${transaction.json(asJson(section.metadata))}
-        ) RETURNING id
-      `;
+      const sectionId = randomUUID();
+      sectionRows.push({
+        id: sectionId,
+        template_id: copyId,
+        source_key: section.sourceKey,
+        name: section.name,
+        position: section.position,
+        metadata: section.metadata,
+      });
+
       for (const item of section.items) {
-        const [newItem] = await transaction`
-          INSERT INTO items (section_id, source_key, name, position, metadata)
-          VALUES (
-            ${newSection.id}, ${item.sourceKey}, ${item.name}, ${item.position},
-            ${transaction.json(asJson(item.metadata))}
-          ) RETURNING id
-        `;
+        const itemId = randomUUID();
+        itemRows.push({
+          id: itemId,
+          section_id: sectionId,
+          source_key: item.sourceKey,
+          name: item.name,
+          position: item.position,
+          metadata: item.metadata,
+        });
+
         for (const comment of item.comments) {
-          await transaction`
-            INSERT INTO comments (
-              item_id, source_key, name, source_html, body_html, plain_text,
-              comment_type, category, position, source_row, metadata
-            ) VALUES (
-              ${newItem.id}, ${comment.sourceKey}, ${comment.name},
-              ${comment.sourceHtml}, ${comment.bodyHtml}, ${comment.plainText},
-              ${comment.commentType}, ${comment.category}, ${comment.position},
-              ${comment.sourceRow}, ${transaction.json(asJson(comment.metadata))}
-            )
-          `;
+          commentRows.push({
+            id: randomUUID(),
+            item_id: itemId,
+            source_key: comment.sourceKey,
+            name: comment.name,
+            source_html: comment.sourceHtml,
+            body_html: comment.bodyHtml,
+            plain_text: comment.plainText,
+            comment_type: comment.commentType,
+            category: comment.category,
+            position: comment.position,
+            source_row: comment.sourceRow,
+            metadata: comment.metadata,
+          });
         }
       }
     }
 
-    for (const warning of source.warnings) {
-      await transaction`
-        INSERT INTO import_warnings (
-          template_id, code, severity, message, row_number, field, raw_data
-        ) VALUES (
-          ${copy.id}, ${warning.code}, ${warning.severity}, ${warning.message},
-          ${warning.rowNumber ?? null}, ${warning.field ?? null},
-          ${warning.rawData ? transaction.json(asJson(warning.rawData)) : null}
-        )
-      `;
+    if (sectionRows.length > 0) {
+      await transaction`INSERT INTO sections ${transaction(sectionRows)}`;
     }
-    return copy.id as string;
+    if (itemRows.length > 0) {
+      await transaction`INSERT INTO items ${transaction(itemRows)}`;
+    }
+    if (commentRows.length > 0) {
+      await transaction`INSERT INTO comments ${transaction(commentRows)}`;
+    }
+
+    const warningRows = source.warnings.map((warning) => ({
+      id: randomUUID(),
+      template_id: copyId,
+      code: warning.code,
+      severity: warning.severity,
+      message: warning.message,
+      row_number: warning.rowNumber ?? null,
+      field: warning.field ?? null,
+      raw_data: warning.rawData ?? null,
+    }));
+    if (warningRows.length > 0) {
+      await transaction`INSERT INTO import_warnings ${transaction(warningRows)}`;
+    }
+
+    return copyId;
   });
 }

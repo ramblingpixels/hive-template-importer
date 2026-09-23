@@ -2,12 +2,12 @@
 
 ## Candidate-owned items before submission
 
-- [ ] Add the real Spectora HTML-text `.xlsx` export to `fixtures/`.
+- [x] Add the real Spectora HTML-text workbook export to `fixtures/`.
 - [ ] Record its exact template name and source below.
-- [ ] Test the importer against that file and update any format aliases it reveals.
+- [x] Test the importer against that file and update any format aliases it reveals.
 - [ ] Complete the required Hive trial workflow and add direct product feedback below.
 - [ ] Decide whether to explore Binsr; document the comparison or explain the choice to skip it.
-- [ ] Create Supabase and run the migration.
+- [x] Create Supabase and run the migration.
 - [ ] Deploy through the candidate's Vercel account.
 - [ ] Import the real template into production and use its direct editor URL in the submission.
 - [ ] Record and publish the walkthrough.
@@ -17,7 +17,7 @@
 
 **Temporary development fixture:** `SYNTHETIC_Spectora_HTML_Text_Demo.xlsx`, produced in code solely to exercise the data model and seed the interface. It is not a real export and is labelled accordingly.
 
-**Final Spectora export:** _Candidate to replace this line with the template name, source, and file path._
+**Final Spectora export:** InterNACHI Residential, exported from Spectora on 2026-09-23 via Export to spreadsheet -> Export HTML Text. File: `fixtures/InterNACHI Residential -2026-09-23.xls`.
 
 No real customer information should appear in the committed workbook.
 
@@ -49,7 +49,7 @@ This addresses the core customer problem: an inspector with four years of tuned 
 
 See `README.md` for the complete contract. Important limitations:
 
-- `.xlsx` only, 10 MB maximum.
+- Modern zipped Excel workbook only, 10 MB maximum. Spectora may use a `.xls` extension for this format.
 - Four structural columns must be detectable: Section Name, Item Name, Comment Name, and Comment Text.
 - Exact comment source HTML is retained, but unsafe elements/attributes are removed from the editable/rendered copy.
 - External media availability is not guaranteed; source URLs may expire or require authentication.
@@ -68,13 +68,13 @@ Automated checks currently completed:
 
 Manual checks to complete with the candidate's database and real export:
 
-- [ ] Preview real export; compare source row, section, item, and comment counts.
+- [x] Preview real export; compare source row, section, item, and comment counts.
 - [ ] Spot-check the first, middle, and last sections against the workbook.
 - [ ] Spot-check emphasis, links, tables, images, and video references when present.
-- [ ] Edit a section, item, comment name, and comment body; save and hard-reload.
-- [ ] Duplicate the template; edit the copy; reload the original and prove it is unchanged.
+- [x] Edit a section, item, comment name, and comment body; save and hard-reload.
+- [x] Duplicate the template; edit the copy; reload the original and prove it is unchanged.
 - [ ] Upload an invalid spreadsheet and show the honest failure state.
-- [ ] Verify `/api/health` in production.
+- [x] Verify `/api/health` locally against Supabase.
 - [ ] Test the final direct template link in a logged-out/private browser.
 
 ## Product exploration
@@ -98,4 +98,3 @@ _Candidate: either add the Hive/Binsr comparison or state that Binsr was skipped
 - OpenAI Codex was used to research the documented Spectora format and implement the repository.
 - Next.js, React, PostgreSQL.js, read-excel-file, sanitize-html, DOMPurify, Zod, and Vitest are used under their respective open-source licenses.
 - No application starter, commercial template, or copied competitor code was used.
-

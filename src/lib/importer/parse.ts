@@ -326,12 +326,13 @@ export async function parseSpectoraWorkbook(
   buffer: Buffer,
   filename: string,
 ): Promise<ParsedTemplate> {
-  if (!filename.toLocaleLowerCase().endsWith(".xlsx")) {
-    throw new ImportValidationError("Only modern .xlsx workbooks are supported.", [
+  const looksLikeModernWorkbook = buffer[0] === 0x50 && buffer[1] === 0x4b;
+  if (!looksLikeModernWorkbook) {
+    throw new ImportValidationError("Only modern Excel workbooks are supported.", [
       {
         code: "UNSUPPORTED_FILE_TYPE",
         severity: "error",
-        message: "Export from Spectora as an .xlsx workbook. Legacy .xls and plain-text files are intentionally rejected.",
+        message: "Export from Spectora as a spreadsheet workbook. True legacy .xls and plain-text files are intentionally rejected.",
       },
     ]);
   }

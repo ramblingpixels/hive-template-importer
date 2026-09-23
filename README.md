@@ -1,6 +1,6 @@
 # Hive Template Studio
 
-A focused migration workflow for home inspectors moving a tuned Spectora template into a new system. It imports Spectora's **Export HTML Text** `.xlsx` workbook into a structured PostgreSQL model, shows what was mapped or could not be mapped, allows core content to be edited, and creates independent copies.
+A focused migration workflow for home inspectors moving a tuned Spectora template into a new system. It imports Spectora's **Export HTML Text** workbook into a structured PostgreSQL model, shows what was mapped or could not be mapped, allows core content to be edited, and creates independent copies.
 
 ## Current status
 
@@ -15,7 +15,7 @@ The synthetic seed is clearly labelled and must not be presented as a Spectora-g
 
 ## Product flow
 
-1. Upload a Spectora HTML-text `.xlsx` export.
+1. Upload a Spectora HTML-text workbook export.
 2. Review hierarchy counts, detected headers, preserved metadata, and row-level exceptions before saving.
 3. Import into templates → sections → items → comments.
 4. Rename the template, sections, items, and comments; edit formatted comment HTML; save to PostgreSQL.
@@ -65,6 +65,12 @@ npm run db:migrate
 npm run db:seed
 ```
 
+Import the real Spectora workbook:
+
+```bash
+npm run import:template -- "fixtures/InterNACHI Residential -2026-09-23.xls"
+```
+
 Start the app:
 
 ```bash
@@ -112,13 +118,13 @@ The metadata fields are deliberately read-only in this scope. They are not dropp
 
 ## Supported input and limits
 
-- Accepted: a single-sheet Spectora HTML-text `.xlsx` export, up to 10 MB.
+- Accepted: a single-sheet Spectora HTML-text modern Excel workbook, up to 10 MB. Spectora may name this file `.xls` even when the contents are a modern zipped workbook.
 - Rejected: plain-text exports, legacy `.xls`, password-protected/corrupt workbooks, and files without the four structural headers.
 - Additional populated sheets produce a visible warning and are not imported.
 - Rich HTML is preserved at rest. Common text formatting, links, tables, images, YouTube/Vimeo embeds, and video sources can render after sanitization. Scripts, event handlers, unsafe URL schemes, arbitrary iframes, and unsafe CSS are retained only in the immutable source field and blocked from display.
 - Information absent from the export cannot be recovered. The receipt distinguishes this from information retained as metadata but not editable in the current UI.
 
-Legacy `.xls` support was deliberately excluded because modern Spectora exports use `.xlsx`, and the commonly used legacy parser has unresolved security advisories. This limitation is explicit in both the upload UI and failure response.
+True legacy binary `.xls` support was deliberately excluded because the commonly used legacy parser has unresolved security advisories. Spectora's mislabeled modern workbook export is supported.
 
 ## Verification
 
@@ -156,4 +162,3 @@ The unit suite checks hierarchy, sparse rows, order, rich-text preservation, ext
 ## AI-tool use and credits
 
 The application was implemented with OpenAI Codex as a coding collaborator. The candidate remains responsible for reviewing, running, understanding, and presenting the submission. Open-source packages and their roles are declared in `package.json`; no UI starter or copied application code was used.
-

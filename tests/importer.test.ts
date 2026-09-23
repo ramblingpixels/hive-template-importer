@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { sanitizeRichHtml } from "@/lib/importer/html";
-import { ImportValidationError, parseSpectoraRows } from "@/lib/importer/parse";
+import { ImportValidationError, parseSpectoraRows, parseSpectoraWorkbook } from "@/lib/importer/parse";
 
 const headers = [
   "Section Name",
@@ -86,3 +86,15 @@ describe("rich HTML safety", () => {
   });
 });
 
+describe("workbook validation", () => {
+  it("rejects files that are not modern zipped Excel workbooks", async () => {
+    await expect(parseSpectoraWorkbook(Buffer.from("not a workbook"), "legacy.xls"))
+      .rejects
+      .toMatchObject({
+        name: "ImportValidationError",
+        warnings: expect.arrayContaining([
+          expect.objectContaining({ code: "UNSUPPORTED_FILE_TYPE" }),
+        ]),
+      });
+  });
+});
