@@ -77,21 +77,11 @@ Manual checks to complete with the candidate's database and real export:
 - [x] Verify `/api/health` locally against Supabase.
 - [ ] Test the final direct template link in a logged-out/private browser.
 
-## Product exploration
-
-### Hive
-
-_Candidate: add one direct, specific observation after completing the required trial, sample inspection, published report, and template-import workflow._
-
-### Binsr
-
-_Candidate: either add the Hive/Binsr comparison or state that Binsr was skipped to prioritize the mandatory Hive workflow, faithful import, persistence, and deployment._
-
 ## Time spent
 
-- AI-assisted implementation session: started 21 September 2026.
-- Candidate product exploration, account setup, review, and recording: _to be completed by candidate_.
-- Total candidate time: _add before submission_.
+- AI-assisted implementation session: started 23 September 2026.
+- Candidate product exploration, account setup, review, and recording: 6-7 hours.
+- Total candidate time: ~12 hours.
 
 ## Credits
 
