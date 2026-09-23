@@ -83,17 +83,22 @@ export function sanitizeRichHtml(html: string): string {
 }
 
 export function htmlToPlainText(html: string): string {
-  return sanitizeHtml(html, {
+  return decodeHtmlEntities(sanitizeHtml(html, {
     allowedTags: [],
     allowedAttributes: {},
-  })
+  }))
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function decodeHtmlEntities(value: string): string {
+  return value
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
     .trim();
 }
 

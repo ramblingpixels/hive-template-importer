@@ -17,7 +17,7 @@ import {
   KNOWN_NORMALIZED_HEADERS,
   normalizeHeader,
 } from "./columns";
-import { containsPotentiallyUnsafeMarkup, htmlToPlainText, sanitizeRichHtml } from "./html";
+import { containsPotentiallyUnsafeMarkup, decodeHtmlEntities, htmlToPlainText, sanitizeRichHtml } from "./html";
 
 type RawCell = CellValue | null;
 
@@ -64,7 +64,7 @@ function sourceKey(kind: string, rowNumber: number, position: number): string {
 }
 
 function safeTemplateName(filename: string): string {
-  return path.basename(filename, path.extname(filename)).replace(/[_-]+/g, " ").trim() || "Imported template";
+  return decodeHtmlEntities(path.basename(filename, path.extname(filename)).replace(/[_-]+/g, " ").trim()) || "Imported template";
 }
 
 function countNested(sections: ParsedSection[]) {
@@ -159,8 +159,8 @@ export function parseSpectoraRows(options: {
       continue;
     }
 
-    const explicitSectionName = valueAt(row, sectionIndex);
-    const explicitItemName = valueAt(row, itemIndex);
+    const explicitSectionName = decodeHtmlEntities(valueAt(row, sectionIndex));
+    const explicitItemName = decodeHtmlEntities(valueAt(row, itemIndex));
     if (explicitSectionName) carriedSectionName = explicitSectionName;
     if (explicitItemName) carriedItemName = explicitItemName;
     if (explicitSectionName && currentSection?.name !== explicitSectionName) {
@@ -218,7 +218,7 @@ export function parseSpectoraRows(options: {
       currentSection.items.push(currentItem);
     }
 
-    const commentName = valueAt(row, commentNameIndex);
+    const commentName = decodeHtmlEntities(valueAt(row, commentNameIndex));
     const sourceHtml = valueAt(row, commentTextIndex);
     const commentType = valueAt(row, commentTypeIndex) || null;
     const category = valueAt(row, categoryIndex) || null;

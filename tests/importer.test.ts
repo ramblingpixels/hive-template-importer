@@ -36,6 +36,21 @@ describe("Spectora HTML-text row mapping", () => {
     expect(parsed.warnings.some((warning) => warning.code === "PRESERVED_UNMODELED_COLUMN")).toBe(true);
   });
 
+  it("decodes HTML entities in template, section, item, and comment names", () => {
+    const parsed = parseSpectoraRows({
+      filename: "Doors &amp; Windows.xlsx",
+      rows: [
+        headers,
+        ["Basement, Foundation &amp; Structure", "Doors &amp; Windows", "Caulking &amp; trim", "<p>Text</p>", "info", "", "0", ""],
+      ],
+    });
+
+    expect(parsed.name).toBe("Doors & Windows");
+    expect(parsed.sections[0].name).toBe("Basement, Foundation & Structure");
+    expect(parsed.sections[0].items[0].name).toBe("Doors & Windows");
+    expect(parsed.sections[0].items[0].comments[0].name).toBe("Caulking & trim");
+  });
+
   it("retains unsafe source markup but sanitizes the editable display copy", () => {
     const parsed = parseSpectoraRows({
       filename: "unsafe.xlsx",
