@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const data = await request.formData();
     const file = data.get("file");
     if (!(file instanceof File)) {
-      return NextResponse.json({ error: "Choose an .xlsx file to preview." }, { status: 400 });
+      return NextResponse.json({ error: "Choose a Spectora workbook export to preview." }, { status: 400 });
     }
     const parsed = await parseSpectoraWorkbook(Buffer.from(await file.arrayBuffer()), file.name);
     return NextResponse.json({
@@ -33,4 +33,3 @@ export async function POST(request: Request) {
     return apiError(error);
   }
 }
-

@@ -354,7 +354,7 @@ export async function parseSpectoraWorkbook(
       {
         code: "INVALID_WORKBOOK",
         severity: "error",
-        message: "The file is not a readable .xlsx workbook. Re-export it from Spectora and try again.",
+        message: "The file is not a readable modern Excel workbook. Re-export it from Spectora and try again.",
       },
     ]);
   }

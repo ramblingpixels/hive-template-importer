@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const file = data.get("file");
     const requestedName = data.get("name");
     if (!(file instanceof File)) {
-      return NextResponse.json({ error: "Choose an .xlsx file to import." }, { status: 400 });
+      return NextResponse.json({ error: "Choose a Spectora workbook export to import." }, { status: 400 });
     }
     const parsed = await parseSpectoraWorkbook(Buffer.from(await file.arrayBuffer()), file.name);
     if (typeof requestedName === "string" && requestedName.trim()) {
@@ -24,4 +24,3 @@ export async function POST(request: Request) {
     return apiError(error);
   }
 }
-

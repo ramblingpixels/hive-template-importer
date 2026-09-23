@@ -104,7 +104,7 @@ export function ImportWizard() {
             <input
               ref={inputRef}
               type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               onChange={(event) => void chooseFile(event.target.files?.[0] ?? null)}
             />
             <span className="upload-orbit"><UploadIcon /></span>
@@ -113,7 +113,7 @@ export function ImportWizard() {
             <button className="button button-outline" type="button" onClick={() => inputRef.current?.click()} disabled={busy !== null}>
               {file ? "Choose a different file" : "Browse files"}
             </button>
-            <small>Modern .xlsx files up to 10 MB</small>
+            <small>Modern Excel workbooks up to 10 MB</small>
           </div>
 
           {error && (
@@ -213,4 +213,3 @@ function formatBytes(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
